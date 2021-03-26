@@ -12,6 +12,7 @@ extern "C" {
             const char* msg = api->GetErrorMessage(status);
             char *copy = (char *)malloc(strlen(msg));
             strcpy(copy, msg);
+            // release status
             api->ReleaseStatus(status);
             return copy;
         }

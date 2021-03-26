@@ -25,4 +25,6 @@ OrtIsTensorResponse isTensor(OrtApi *api, OrtValue *value);
 
 OrtGetTensorMutableFloatDataResponse getTensorMutableFloatData(OrtApi *api, OrtValue *value);
 
+void releaseOrtValue(OrtApi *api, OrtValue *value);
+
 #endif

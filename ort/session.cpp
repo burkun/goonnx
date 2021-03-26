@@ -3,7 +3,8 @@ extern "C" {
     #include <stdio.h>
     #include "session.h"
 
-    OrtCreateSessionResponse createSession(OrtApi *api, OrtEnv *env, const char *modelPath, OrtSessionOptions *sessionOptions) {
+    OrtCreateSessionResponse createSession(OrtApi *api, OrtEnv *env, const char *modelPath,
+            OrtSessionOptions *sessionOptions) {
         OrtSession *session;
         OrtStatus *status;
 
@@ -15,6 +16,22 @@ extern "C" {
 
         return response;
     }
+
+    OrtCreateSessionResponse createSessionFromArray(OrtApi *api, OrtEnv *env, const void* model_data,
+            size_t model_data_length, OrtSessionOptions *sessionOptions) {
+        OrtSession *session;
+        OrtStatus *status;
+
+        status = api->CreateSessionFromArray(env, model_data, model_data_length, sessionOptions, &session);
+
+        OrtCreateSessionResponse response;
+        response.session = session;
+        response.status = status;
+
+        return response;
+    }
+
+
 
     void releaseSession(OrtApi *api, OrtSession *session) {
         api->ReleaseSession(session);
@@ -41,7 +58,7 @@ extern "C" {
         char *inputName;
         OrtStatus *status;
 
-        api->SessionGetInputName(session, i, allocator, &inputName);
+        status = api->SessionGetInputName(session, i, allocator, &inputName);
 
         OrtGetIONameResponse response;
         response.name = inputName;
@@ -80,7 +97,7 @@ extern "C" {
         char *outputName;
         OrtStatus *status;
 
-        api->SessionGetOutputName(session, i, allocator, &outputName);
+        status = api->SessionGetOutputName(session, i, allocator, &outputName);
 
         OrtGetIONameResponse response;
         response.name = outputName;
@@ -103,16 +120,15 @@ extern "C" {
     }
 
     OrtRunResponse run(OrtApi *api, OrtSession *session, OrtRunOptions *runOptions, char **inputNames, OrtValue **input,
-            size_t inputLen, char **outputNames, size_t outputNamesLen) {
-        OrtValue *output = NULL;
+            size_t inputLen, char **outputNames, size_t outputNamesLen, OrtValue** output) {
         OrtStatus *status;
 
-        status = api->Run(session, runOptions, inputNames, input, inputLen, outputNames, outputNamesLen, &output);
+        // output and input must release
+        status = api->Run(session, runOptions, inputNames, input, inputLen, outputNames, outputNamesLen, output);
 
         OrtRunResponse response;
         response.output = output;
         response.status = status;
-
         return response;
     }
 }

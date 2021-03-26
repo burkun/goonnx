@@ -24,12 +24,12 @@ typedef struct OrtGetIOTypeInfoResponse {
 } OrtGetIOTypeInfoResponse;
 
 typedef struct OrtRunResponse {
-    OrtValue *output;
+    OrtValue **output;
     OrtStatus *status;
 } OrtRunResponse;
 
-OrtCreateSessionResponse createSession(OrtApi *api, OrtEnv *env, const char *modelPath,
-        OrtSessionOptions *sessionOptions);
+OrtCreateSessionResponse createSession(OrtApi *api, OrtEnv *env, const char *modelPath, OrtSessionOptions *sessionOptions);
+OrtCreateSessionResponse createSessionFromArray(OrtApi *api, OrtEnv *env, const void* model_data, size_t model_data_length, OrtSessionOptions *sessionOptions);
 void releaseSession(OrtApi *api, OrtSession *session);
 void releaseSessionOptions(OrtApi *api, OrtSessionOptions *opts);
 OrtGetIOCountResponse getInputCount(OrtApi *api, OrtSession *session);
@@ -39,6 +39,6 @@ OrtGetIOCountResponse getOutputCount(OrtApi *api, OrtSession *session);
 OrtGetIONameResponse getOutputName(OrtApi *api, OrtSession *session, size_t i, OrtAllocator *allocator);
 OrtGetIOTypeInfoResponse getOutputTypeInfo(OrtApi *api, OrtSession *session, size_t i);
 OrtRunResponse run(OrtApi *api, OrtSession *session, OrtRunOptions *runOptions, char **inputNames, OrtValue **input,
-        size_t inputLen, char **outputNames, size_t outputNamesLen);
+        size_t inputLen, char **outputNames, size_t outputNamesLen, OrtValue **output);
 
 #endif

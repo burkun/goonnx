@@ -1,7 +1,6 @@
 package ort
 
 /*
-#cgo LDFLAGS: -L/usr/local/lib/onnx -lonnxruntime
 #include <onnxruntime_c_api.h>
 #include "api.h"
 */
@@ -24,14 +23,13 @@ func newApi() *api {
 }
 
 func (a *api) ParseStatus(status *C.OrtStatus) error {
+    // if parse status error, return error, other nil
 	if status == nil {
 		return nil
 	}
-
 	cMessage := C.parseStatus(a.ort, status)
 	defer C.free(unsafe.Pointer(cMessage))
 	var message string
 	message = C.GoString(cMessage)
-
 	return fmt.Errorf("%s", message)
 }

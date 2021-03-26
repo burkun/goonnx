@@ -41,4 +41,11 @@ extern "C" {
 
         return response;
     }
+
+    void releaseOrtValue(OrtApi *api, OrtValue *value) {
+        if (value != NULL) {
+            api->ReleaseValue(value);
+        }
+    }
+
 }

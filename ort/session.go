@@ -23,7 +23,7 @@ type Session interface {
 	GetOutputTypeInfo(index int) (TypeInfo, error)
 	GetOutputTypeInfos() ([]TypeInfo, error)
 
-	Run(runOptions *RunOptions, inputValues []Value) ([]Value, error)
+	Run(runOptions *RunOptions, inputValues []Value, outputValues []Value) error
 	ReleaseSession()
 
 	PrintIOInfo()
@@ -78,6 +78,7 @@ func NewSession(env Environment, modelPath string, sessionOpts *SessionOptions) 
 		alloc:           allocator,
 	}, nil
 }
+
 
 func (s *session) GetInputCount() (int, error) {
 	if s.inputCount > -1 {
@@ -184,55 +185,35 @@ func (s *session) getInputTypeInfo(index int) (TypeInfo, error) {
 	return newTypeInfo(response.typeInfo), nil
 }
 
-func (s *session) Run(runOpts *RunOptions, inputValues []Value) ([]Value, error) {
+// thread safe
+func (s *session) Run(runOpts *RunOptions, inputValues []Value, outputValues []Value) error {
 	ortRunOpts, err := runOpts.toOrtRunOptions()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	outputNames, err := s.GetOutputNames()
-	if err != nil {
-		return nil, err
-	}
-	cOutputNames := stringsToCharArrayPtr(outputNames)
-	defer freeCStrings(cOutputNames)
 
 	cInputNames, cInputValues, err := valuesToOrtValueArray(inputValues)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer freeCStrings(cInputNames)
 
-	inLen := C.size_t(len(inputValues))
-	outNamesLen := C.size_t(len(outputNames))
+    cOutputNames, cOutValues, err := valuesToOrtValueArray(outputValues)
+	if err != nil {
+		return err
+	}
+	defer freeCStrings(cOutputNames)
 
-	response := C.run(ortApi.ort, s.cSession, ortRunOpts, &cInputNames[0], &cInputValues[0], inLen, &cOutputNames[0], outNamesLen)
+	inLen := C.size_t(len(inputValues))
+	outLen := C.size_t(len(outputValues))
+
+    response := C.run(ortApi.ort, s.cSession, ortRunOpts,
+                    &cInputNames[0], &cInputValues[0], inLen, &cOutputNames[0], outLen, &cOutValues[0])
 	err = ortApi.ParseStatus(response.status)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return s.outputsToValueSlice(outputNames, response.output)
-}
-
-func (s *session) outputsToValueSlice(names []string, outputs *C.OrtValue) ([]Value, error) {
-	length := len(names)
-	tmpslice := (*[1 << 30]C.OrtValue)(unsafe.Pointer(outputs))[:length:length]
-	outValues := make([]Value, length)
-
-	for i := 0; i < length; i++ {
-		typeInfo, err := s.GetOutputTypeInfo(i)
-		if err != nil {
-			return nil, err
-		}
-
-		tensorInfo, err := typeInfo.ToTensorInfo()
-		if err != nil {
-			return nil, err
-		}
-		outValues[i] = newValue(names[i], tensorInfo, &tmpslice[i])
-	}
-	return outValues, nil
+    return nil
 }
 
 func stringsToCharArrayPtr(in []string) []*C.char {

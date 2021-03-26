@@ -15,6 +15,7 @@ type Value interface {
 	GetName() string
 	IsTensor() (bool, error)
 	GetTensorMutableFloatData() ([]float32, error)
+    ReleaseValue()
 }
 
 type value struct {
@@ -110,6 +111,10 @@ func NewTensorWithDataAsValue(memInfo MemoryInfo, inData []byte, typeInfo Tensor
 
 func (v *value) GetName() string {
 	return v.name
+}
+
+func (v *value) ReleaseValue() {
+    C.releaseOrtValue(ortApi.ort, v.cOrtValue)
 }
 
 func (v *value) GetTensorMutableFloatData() ([]float32, error) {

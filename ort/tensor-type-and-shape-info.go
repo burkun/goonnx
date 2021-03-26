@@ -6,6 +6,7 @@ package ort
 */
 import "C"
 import (
+    "fmt"
 	"reflect"
 	"unsafe"
 )
@@ -36,6 +37,7 @@ type TensorTypeAndShapeInfo interface {
 	GetElementType() (ONNXTensorElementDataType, error)
 	GetDimensionsCount() (int, error)
 	GetDimensions() ([]int64, error)
+    SetBatchNum(num int64) error
 }
 
 type tensorTypeAndShapeInfo struct {
@@ -52,6 +54,15 @@ func newTensorTypeAndShapeInfo(cTensorInfo *C.OrtTensorTypeAndShapeInfo) *tensor
 		dims:        nil,
 		cTensorInfo: cTensorInfo,
 	}
+}
+
+func (i *tensorTypeAndShapeInfo) SetBatchNum(num int64) error {
+    i.cGetDimensions()
+    if i.dimCount <= 0 {
+		return fmt.Errorf("invalid dim cnt")
+    }
+    i.dims[0] = num
+    return nil
 }
 
 func (i *tensorTypeAndShapeInfo) GetElementType() (ONNXTensorElementDataType, error) {
