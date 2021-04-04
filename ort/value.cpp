@@ -42,6 +42,16 @@ extern "C" {
         return response;
     }
 
+    OrtGetTensorMutableInt32DataResponse getTensorMutableInt32Data(OrtApi *api, OrtValue *value) {
+        int32_t *out;
+        OrtStatus *status;
+        status = api->GetTensorMutableData(value, (void **)&out);
+        OrtGetTensorMutableInt32DataResponse response;
+        response.status = status;
+        response.out = out;
+        return response;
+    }
+
     void releaseOrtValue(OrtApi *api, OrtValue *value) {
         if (value != NULL) {
             api->ReleaseValue(value);

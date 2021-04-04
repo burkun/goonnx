@@ -18,12 +18,19 @@ typedef struct OrtGetTensorMutableFloatDataResponse {
     OrtStatus *status;
 } OrtGetTensorMutableFloatDataResponse;
 
+typedef struct OrtGetTensorMutableInt32DataResponse {
+    int32_t *out;
+    OrtStatus *status;
+} OrtGetTensorMutableInt32DataResponse;
+
 OrtCreateTensorWithDataAsOrtValueResponse createTensorWithDataAsOrtValue(OrtApi *api, OrtMemoryInfo *memoryInfo,
         void *data, size_t dataLen, int64_t *shape, size_t shapeLen, ONNXTensorElementDataType type);
 
 OrtIsTensorResponse isTensor(OrtApi *api, OrtValue *value);
 
 OrtGetTensorMutableFloatDataResponse getTensorMutableFloatData(OrtApi *api, OrtValue *value);
+
+OrtGetTensorMutableInt32DataResponse getTensorMutableInt32Data(OrtApi *api, OrtValue *value);
 
 void releaseOrtValue(OrtApi *api, OrtValue *value);
 

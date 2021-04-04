@@ -12,7 +12,7 @@ extern "C" {
             const char* msg = api->GetErrorMessage(status);
             char *copy = (char *)malloc(strlen(msg));
             strcpy(copy, msg);
-            // release status
+            // 释放status状态, 用新的内存存放msg
             api->ReleaseStatus(status);
             return copy;
         }

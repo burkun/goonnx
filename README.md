@@ -2,6 +2,11 @@
 
 Go language bindings for ONNX runtime
 
+## Bug Fix(booker)
+1. Add new api for batch number setting
+2. Add new api for Release Session RunOptions
+3. Add new api for GetTensorMutableInt32Data
+
 ## About
 I'm a fan of Go and have just started digging a bit deeper in to machine learning.  I heard about ONNX runtime and I'm
 a fan of standardization, so it seemed like a good place to start.  I realized ONNX runtime didn't have Go language

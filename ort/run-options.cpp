@@ -8,31 +8,36 @@ extern "C" {
 
     	status = api->CreateRunOptions(&options);
     	if(status != NULL){
-    		return respondRunOptionsErrorStatus(status);
+            releaseRunOptions(api, options);
+	        return respondRunOptionsErrorStatus(status);
     	}
 
     	if(params->tag != NULL) {
     		status = api->RunOptionsSetRunTag(options, params->tag);
     		if(status != NULL) {
-    			return releaseRunOptionsAndRespondErrorStatus(api, options, status);
+                releaseRunOptions(api, options);
+	            return respondRunOptionsErrorStatus(status);
     		}
     	}
         if(params->logVerbosityLevel > 0) {
             status = api->RunOptionsSetRunLogVerbosityLevel(options, params->logVerbosityLevel);
             if(status != NULL) {
-                return releaseRunOptionsAndRespondErrorStatus(api, options, status);
+                releaseRunOptions(api, options);
+	            return respondRunOptionsErrorStatus(status);
             }
         }
         if(params->logSeverityLevel > 0) {
             status = api->RunOptionsSetRunLogSeverityLevel(options, params->logSeverityLevel);
             if(status != NULL) {
-                return releaseRunOptionsAndRespondErrorStatus(api, options, status);
+                releaseRunOptions(api, options);
+	            return respondRunOptionsErrorStatus(status);
             }
         }
         if(params->terminate == 1) {
         	status = api->RunOptionsSetTerminate(options);
         	if(status != NULL) {
-        		return releaseRunOptionsAndRespondErrorStatus(api, options, status);
+                releaseRunOptions(api, options);
+	            return respondRunOptionsErrorStatus(status);
         	}
         }
 
@@ -43,17 +48,14 @@ extern "C" {
         return response;
     }
 
-	OrtCreateRunOptionsResponse releaseRunOptionsAndRespondErrorStatus(OrtApi *api, OrtRunOptions *runOptions, OrtStatus *status) {
+	void releaseRunOptions(OrtApi *api, OrtRunOptions *runOptions) {
 	    api->ReleaseRunOptions(runOptions);
-	    return respondRunOptionsErrorStatus(status);
 	}
 
     OrtCreateRunOptionsResponse respondRunOptionsErrorStatus(OrtStatus *status) {
 	    OrtCreateRunOptionsResponse response;
-
 	    response.status = status;
 	    response.runOptions = NULL;
-
 	    return response;
 	}
 }

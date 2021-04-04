@@ -185,13 +185,13 @@ func (s *session) getInputTypeInfo(index int) (TypeInfo, error) {
 	return newTypeInfo(response.typeInfo), nil
 }
 
-// thread safe
+// booker: 这个方法是线程安全的
 func (s *session) Run(runOpts *RunOptions, inputValues []Value, outputValues []Value) error {
 	ortRunOpts, err := runOpts.toOrtRunOptions()
 	if err != nil {
 		return err
 	}
-
+    defer runOpts.releaseOrtRunOptions(ortRunOpts)
 	cInputNames, cInputValues, err := valuesToOrtValueArray(inputValues)
 	if err != nil {
 		return err
@@ -245,6 +245,7 @@ func valuesToOrtValueArray(in []Value) ([]*C.char, []*C.OrtValue, error) {
 }
 
 func (s *session) ReleaseSession() {
+    // 删除内存, 删除typeinfo和tensorinfo
 	for _, typeInfo := range s.inputTypeInfos {
 		typeInfo.ReleaseTypeInfo()
 	}

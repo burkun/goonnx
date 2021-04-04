@@ -14,7 +14,10 @@ import (
 type Value interface {
 	GetName() string
 	IsTensor() (bool, error)
+    IsInt32() (bool, error)
+    IsFloat() (bool, error)
 	GetTensorMutableFloatData() ([]float32, error)
+	GetTensorMutableInt32Data() ([]int32, error)
     ReleaseValue()
 }
 
@@ -140,6 +143,28 @@ func (v *value) GetTensorMutableFloatData() ([]float32, error) {
 	return output, nil
 }
 
+func (v *value) GetTensorMutableInt32Data() ([]int32, error) {
+	response := C.getTensorMutableFloatData(ortApi.ort, v.cOrtValue)
+	err := ortApi.ParseStatus(response.status)
+	if err != nil {
+		return nil, err
+	}
+
+	len, err := v.calcDataSize()
+	if err != nil {
+		return nil, err
+	}
+
+	var data []int32
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&data))
+	sliceHeader.Cap = int(len)
+	sliceHeader.Len = int(len)
+	sliceHeader.Data = uintptr(unsafe.Pointer(response.out))
+
+	output := append([]int32(nil), data...)
+	return output, nil
+}
+
 func (v *value) IsTensor() (bool, error) {
 	response := C.isTensor(ortApi.ort, v.cOrtValue)
 	err := ortApi.ParseStatus(response.status)
@@ -150,6 +175,16 @@ func (v *value) IsTensor() (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func (v *value) IsInt32() (bool, error) {
+    etype, err := v.typeInfo.GetElementType()
+    return etype == TensorElemDataTypeInt32, err
+}
+
+func (v *value) IsFloat() (bool, error) {
+    etype, err := v.typeInfo.GetElementType()
+    return etype == TensorElemDataTypeFloat, err
 }
 
 func (v *value) calcDataSize() (int64, error) {

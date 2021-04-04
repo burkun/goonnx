@@ -15,7 +15,7 @@ typedef struct OrtCreateRunOptionsResponse {
 } OrtCreateRunOptionsResponse;
 
 OrtCreateRunOptionsResponse createRunOptions(OrtApi *api, OrtCreateRunOptionsParameters *params);
-OrtCreateRunOptionsResponse releaseRunOptionsAndRespondErrorStatus(OrtApi *api, OrtRunOptions *runOptions, OrtStatus *status);
+void releaseRunOptions(OrtApi *api, OrtRunOptions *runOptions);
 OrtCreateRunOptionsResponse respondRunOptionsErrorStatus(OrtStatus *status);
 
 #endif

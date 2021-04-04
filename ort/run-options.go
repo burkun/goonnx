@@ -39,3 +39,7 @@ func (o *RunOptions) toOrtRunOptions() (*C.OrtRunOptions, error) {
 	}
 	return response.runOptions, nil
 }
+
+func (o *RunOptions) releaseOrtRunOptions(cOpt *C.OrtRunOptions) {
+    C.releaseRunOptions(ortApi.ort, cOpt)
+}

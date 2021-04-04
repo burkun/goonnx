@@ -123,7 +123,7 @@ extern "C" {
             size_t inputLen, char **outputNames, size_t outputNamesLen, OrtValue** output) {
         OrtStatus *status;
 
-        // output and input must release
+        // output 和 input都需要释放
         status = api->Run(session, runOptions, inputNames, input, inputLen, outputNames, outputNamesLen, output);
 
         OrtRunResponse response;
